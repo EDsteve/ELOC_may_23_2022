@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <Arduino.h>
 #include <stdio.h>
-#include <FreeRTOS.h>
+#include <RTOS.h>
 #include <I2SMEMSSampler.h>
 #include <ADCSampler.h>
 #include <esp_bt.h>
@@ -79,6 +79,7 @@
 esp_adc_cal_characteristics_t gadc1_chars;
 
 
+static const char *TAG = "MAIN";
 
 //global variables for reset
 //Power on reset does not preserve RTC RAM.
@@ -251,7 +252,7 @@ float calculateVoltageOffset() {
   float temp= getVoltage()-gvLow; //if v = 2.6 offset will be neg so need to be added  if 2.8, pos, so need to be sub 
   gVoltageOffset=temp*-1.0;
   Serial.println ("voltage offset is "+String(gVoltageOffset));
- 
+  return gVoltageOffset;
 }
 
 
@@ -271,22 +272,17 @@ void print_reset_reason()
   reason= esp_reset_reason();
   switch ( reason)
   {
-    case 1 : Serial.println ("POWERON_RESET");break;          /**<1,  Vbat power on reset*/
-    case 3 : Serial.println ("SW_RESET");break;               /**<3,  Software reset digital core*/
-    case 4 : Serial.println ("OWDT_RESET");break;             /**<4,  Legacy watch dog reset digital core*/
-    case 5 : Serial.println ("DEEPSLEEP_RESET");break;        /**<5,  Deep Sleep reset digital core*/
-    case 6 : Serial.println ("SDIO_RESET");break;             /**<6,  Reset by SLC module, reset digital core*/
-    case 7 : Serial.println ("TG0WDT_SYS_RESET");break;       /**<7,  Timer Group0 Watch dog reset digital core*/
-    case 8 : Serial.println ("TG1WDT_SYS_RESET");break;       /**<8,  Timer Group1 Watch dog reset digital core*/
-    case 9 : Serial.println ("RTCWDT_SYS_RESET");break;       /**<9,  RTC Watch dog Reset digital core*/
-    case 10 : Serial.println ("INTRUSION_RESET");break;       /**<10, Instrusion tested to reset CPU*/
-    case 11 : Serial.println ("TGWDT_CPU_RESET");break;       /**<11, Time Group reset CPU*/
-    case 12 : Serial.println ("SW_CPU_RESET");break;          /**<12, Software reset CPU*/
-    case 13 : Serial.println ("RTCWDT_CPU_RESET");break;      /**<13, RTC Watch dog Reset CPU*/
-    case 14 : Serial.println ("EXT_CPU_RESET");break;         /**<14, for APP CPU, reseted by PRO CPU*/
-    case 15 : Serial.println ("RTCWDT_BROWN_OUT_RESET");break;/**<15, Reset when the vdd voltage is not stable*/
-    case 16 : Serial.println ("RTCWDT_RTC_RESET");break;      /**<16, RTC Watch dog reset digital core and rtc module*/
-    default : Serial.println ("NO_MEAN");
+    case ESP_RST_POWERON: Serial.println ("ESP_RST_POWERON");break;    
+    case ESP_RST_EXT: Serial.println ("ESP_RST_EXT");break;        //!< Reset by external pin (not applicable for ESP32)
+    case ESP_RST_SW: Serial.println ("ESP_RST_SW");break;         //!< Software reset via esp_restart
+    case ESP_RST_PANIC: Serial.println ("ESP_RST_PANIC");break;      //!< Software reset due to exception/panic
+    case ESP_RST_INT_WDT: Serial.println ("ESP_RST_INT_WDT");break;    //!< Reset (software or hardware) due to interrupt watchdog
+    case ESP_RST_TASK_WDT: Serial.println ("ESP_RST_TASK_WDT");break;   //!< Reset due to task watchdog
+    case ESP_RST_WDT: Serial.println ("ESP_RST_WDT");break;        //!< Reset due to other watchdogs
+    case ESP_RST_DEEPSLEEP: Serial.println ("ESP_RST_DEEPSLEEP");break;  //!< Reset after exiting deep sleep mode
+    case ESP_RST_BROWNOUT: Serial.println ("ESP_RST_BROWNOUT");break;   //!< Brownout reset (software or hardware)
+    case ESP_RST_SDIO: Serial.println ("ESP_RST_SDIO");break;       //!< Reset over SDIO
+    default: Serial.println ("ESP_RST_UNKNOWN");                    //!< Reset reason can not be determined
   }
 }
 
@@ -398,7 +394,7 @@ void freeSpace() {
     fre_sect = fre_clust * fs->csize;
 
     /* Print the free space (assuming 512 bytes/sector) */
-    Serial.printf("%10lu KiB total drive space.\n%10lu KiB available.\n",
+    Serial.printf("%10u KiB total drive space.\n%10u KiB available.\n",
            tot_sect / 2, fre_sect / 2);
 
 
@@ -1149,7 +1145,7 @@ void wait_for_button_push()
  
   //digitalWrite(BATTERY_LED,LOW);
   //bool gBatteryLEDToggle=false;
-  float currentvolts;
+  float currentvolts = 0.0f;
  //currentvolts= getVoltage()+ gVoltageOffset;
   
   gRecording=false;
@@ -1915,7 +1911,7 @@ void setup()
   pinMode(VOLTAGE_PIN,INPUT);
   analogSetPinAttenuation(VOLTAGE_PIN, ADC_11db); //set channel attenuation?
     //adc_calibration_init();
-  setCpuFrequencyMhz(80);
+//   setCpuFrequencyMhz(80);
  
   
     attachInterrupt(GPIO_BUTTON, butttonISR, CHANGE);
