@@ -6,11 +6,11 @@ extern int gSampleRate, gBufferLen,gBufferCount;
 i2s_config_t i2s_mic_Config = {
     .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX),
     //.sample_rate = SAMPLE_RATE,
-    .sample_rate = gSampleRate,
+    .sample_rate = (uint32_t)gSampleRate,
     .bits_per_sample = I2S_BITS_PER_SAMPLE_32BIT,
     
-    .channel_format = (i2s_channel_fmt_t)CHANNEL_SELECT,
-    //.channel_format = I2S_CHANNEL_FMT_ONLY_RIGHT,
+    .channel_format = I2S_CHANNEL_FMT_ONLY_RIGHT,
+    // .channel_format = I2S_CHANNEL_FMT_ONLY_RIGHT,
     //.channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT,
    
     .communication_format = I2S_COMM_FORMAT_I2S,
@@ -23,6 +23,7 @@ i2s_config_t i2s_mic_Config = {
 
 // i2s microphone pins
 i2s_pin_config_t i2s_mic_pins = {
+    .mck_io_num = I2S_PIN_NO_CHANGE,
     .bck_io_num = I2S_MIC_SERIAL_CLOCK,
     .ws_io_num = I2S_MIC_LEFT_RIGHT_CLOCK,
     .data_out_num = I2S_PIN_NO_CHANGE,
