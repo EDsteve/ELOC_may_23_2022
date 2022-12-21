@@ -384,7 +384,8 @@ void btwrite(String theString){
 
 
 void freeSpace() {
- FATFS *fs;
+  if (gMountedSDCard) {
+    FATFS *fs;
     DWORD fre_clust, fre_sect, tot_sect;
     FRESULT res;
     /* Get volume information and free clusters of drive 0 */
@@ -408,7 +409,7 @@ void freeSpace() {
       Serial.println(" ");
       Serial.print(gFreeSpaceKB); 
       Serial.println(" KB free");
-
+  }
 }
 
 
