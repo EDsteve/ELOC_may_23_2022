@@ -75,6 +75,7 @@
 //#include  "rom/rtc.h"
 #include "driver/adc.h"
 #include "esp_adc_cal.h"
+#include "esp_pm.h"
 #define ADC_EXAMPLE_CALI_SCHEME  ESP_ADC_CAL_VAL_EFUSE_VREF
 esp_adc_cal_characteristics_t gadc1_chars;
 
@@ -1934,7 +1935,13 @@ void setup()
 //listDir(SD, "/eloc/update", 0);
 //updateFirmware();
 
+  esp_pm_config_esp32_t cfg = {
+      .max_freq_mhz = 80,
+      .min_freq_mhz = 10,
+      .light_sleep_enable = true
+  };
 
+  esp_pm_configure(&cfg);
   
   xTaskCreate(main_task, "Main", 8096, NULL, 0, NULL);
   //xTaskCreatePinnedToCore (TASK_1,	"TASK_1",	4096, (void *)1, 1, NULL, CORE1);
