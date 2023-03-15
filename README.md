@@ -1,5 +1,7 @@
 This firmware is made for the ELOC-S 2.7 shield.
+
 The code is for PLatformIO.
+
 The ELOC-S 2.7 uses a ESP32 development board which do not have a USB to Serial IC and no LDO on board any more (I cut it off to reduce power consumption). So if you want to upload new code. You can do that via UART (RX TX) or you compile your code in PlatformIO and upload the .bin file to the ELOC-S with the app. How to update the firmware with an .bin file is explained here: https://youtu.be/nzglXrrPFXw
 
 More informtion about the ELOC-S on the website: https://wildlifebug.com/
