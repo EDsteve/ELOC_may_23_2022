@@ -1,4 +1,4 @@
-This firmware is made for the ELOC-S 2.7 shield.
+This firmware is made for the ELOC-S 2.7 shield only. It will not work on ELOC-S 3.0 or higher.
 
 The code is for PLatformIO.
 
